@@ -1,0 +1,16 @@
+antlr4-python3-runtime==4.7.1
+scikit-learn==0.19.1
+numpy==1.14.0
+ImageHash==4.0
+pprint==0.1
+argparse==1.4.0
+Pillow==5.0.0
+Flask==0.12.2
+Flask-Cors==3.0.3
+Werkzeug==0.14.1
+redis==2.10.6
+dask==0.16.1
+rq==0.10.0
+rq_dashboard==0.3.11
+distributed==1.21.8
+requests==2.18.4

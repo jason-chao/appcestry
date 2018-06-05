@@ -1,0 +1,22 @@
+FROM jasonthc/appcestry-base:0.0.1a
+
+
+ENV APPCESTRY_DASK_SCHEDULER 127.0.0.1:8786
+ENV APPCESTRY_HTTP_SERVER http://127.0.0.1:8080
+ENV APPCESTRY_HTTP_LISTENING_ADDR 0.0.0.0
+ENV APPCESTRY_HTTP_LISTENING_PORT 8080
+ENV APPCESTRY_REDIS  redis://127.0.0.1:6379
+
+ENV APPCESTRY_CORE_DIR /appcestry
+ENV PATH "${APPCESTRY_CORE_DIR}:${PATH}"
+ENV PYTHONPATH "${APPCESTRY_CORE_DIR}:${PYTHONPATH}"
+
+COPY *.py ./
+COPY Smali* ./
+COPY rq_worker_*.sh ./
+COPY dask_*.sh ./
+RUN chmod a+x ./*.py
+RUN chmod a+x ./*.sh
+RUN python3 -m compileall
+RUN python3 -m compileall .
+CMD ["/bin/bash"]
