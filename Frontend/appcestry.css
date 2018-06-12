@@ -1,0 +1,61 @@
+body {
+    overflow-x: hidden;
+}
+
+.dropzone {
+    background-color: rgba(34, 167, 204, 0.3);
+    border: none;
+    min-height: 15%;
+}
+
+.fingertip-background {
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-image: url(images/fingertip-phone-bg.jpg);
+}
+
+.dna-background {
+    height: 200%;
+    width: 100%;
+    position: absolute;
+    top: -20%;
+    left: 0%;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    -webkit-filter: grayscale(0.7);
+    filter: grayscale(0.7);
+    z-index: -1;
+    opacity: .10;
+    transform: rotate(140deg);
+    background-image: url(images/dna.svg);
+}
+
+.bot-background {
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: 18%;
+    background-image: url(images/bot-640.png);
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-attachment: local;
+}
+
+.genetest-background {
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: 18%;
+    background-image: url(images/genetic-testing-640.png);
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-attachment: local;
+}

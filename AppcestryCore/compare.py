@@ -14,7 +14,6 @@ import itertools
 import gc
 import random
 
-
 hashFeatureNumber = 2 ** 16
 nGramRange = (16, 16)
 tmpDir = os.path.curdir
@@ -132,10 +131,10 @@ def compareGenes(gene1, gene2):
 
         print("Comparing media files ...")
         result["media"]["exactDuplicates"] = getJaccardSimilarity(gene1["features"]["media_sha256"],
-                                                                    gene2["features"]["media_sha256"])
+                                                                  gene2["features"]["media_sha256"])
 
         result["media"]["nearDuplicates"] = getJaccardSimilarity(gene1["features"]["media_phash"],
-                                                                   gene2["features"]["media_phash"])
+                                                                 gene2["features"]["media_phash"])
 
         print("Comparing permissions and features ...")
         result["permission"] = {
@@ -152,7 +151,6 @@ def compareGenes(gene1, gene2):
 
 
 def computeFeatures(geneObject):
-
     geneObject["features"] = {}
     geneObject["features"]["smaliVector"] = getHashVector(geneObject["smali"])
     geneObject["features"]["media_phash"] = list(geneObject["media"]["phash"].keys())
@@ -177,7 +175,11 @@ def comparePair(geneFilename1, geneFilename2):
         gene2 = computeFeatures(gene2)
         print("Comparing {} to {}".format(gene1["appID"], gene2["appID"]))
         result = compareGenes(gene1, gene2)
-        result["pair"] = [gene1["appID"], gene2["appID"]]
+        result["pair"] = []
+        result["pair"].extend([{"id": gene1["appID"],
+                                "version": gene1["appVersion"]},
+                               {"id": gene2["appID"],
+                                "version": gene2["appVersion"]}])
     except:
         print("Comparison failed")
     gc.collect()

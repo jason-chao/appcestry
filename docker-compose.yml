@@ -6,20 +6,29 @@ services:
     expose:
       - "6379"
 
+  web-frontend:
+    image: jasonthc/appcestry-frontend:0.0.1b
+    env_file:
+      - ./appcestry_cluster.env
+    depends_on:
+      - http-interface
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+
   http-interface:
-    image: jasonthc/appcestry:0.0.1a
+    image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
     depends_on:
       - redis
-    ports:
-      - "8080:8080"
     expose:
-      - "8080"
+      - "8899"
     entrypoint: /appcestry/app.py
 
   rq-worker-convert:
-    image: jasonthc/appcestry:0.0.1a
+    image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
     depends_on:
@@ -28,7 +37,7 @@ services:
     entrypoint: /appcestry/rq_worker_convert.sh
 
   rq-worker-compare:
-    image: jasonthc/appcestry:0.0.1a
+    image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
     depends_on:
@@ -37,7 +46,7 @@ services:
     entrypoint: /appcestry/rq_worker_compare.sh
 
   dask-scheduler:
-    image: jasonthc/appcestry:0.0.1a
+    image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
     expose:
@@ -45,7 +54,7 @@ services:
     command: /appcestry/dask_scheduler.sh
 
   dask-worker:
-    image: jasonthc/appcestry:0.0.1a
+    image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
     depends_on:

@@ -17,7 +17,7 @@ import itertools
 
 coreDir = os.getenv("APPCESTRY_CORE_DIR", os.path.curdir)
 daskSchedulerConnection = os.getenv("APPCESTRY_DASK_SCHEDULER", "127.0.0.1:8786")
-httpServerDestination = os.getenv("APPCESTRY_HTTP_SERVER", "http://127.0.0.1:8080")
+httpServerDestination = os.getenv("APPCESTRY_HTTP_SERVER", "http://127.0.0.1:8899")
 fileDownloadBaseUrl = "{}/tmpFile/".format(httpServerDestination)
 fileUploadBaseUrl = "{}/tmpFile".format(httpServerDestination)
 

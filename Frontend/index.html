@@ -1,10 +1,317 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>$Title$</title>
+    <title>Appcestry</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/dropzone.css"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
+    <link rel="stylesheet" href="appcestry.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/dropzone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.3.1/sha.js"></script>
 </head>
 <body>
-$END$
+<div class="dna-background"></div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">
+        <img class="img-fluid" src="images/gene-smartphone.svg">
+        Appcestry
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto list-group" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="list" href="#about"
+                   role="tab">About</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="linkToTabConvert" data-toggle="list" href="#extract"
+                   role="tab">Extract AppGenes from APKs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="linkToTabCompare" data-toggle="list" href="#compare"
+                   role="tab">Compare AppGenes</a>
+            </li>
+        </ul>
+        <a href="https://github.com/jason-chao/appcestry" target="_blank">
+            <img class="img-fluid" src="images/github-32.png">
+        </a>
+    </div>
+</nav>
+<div class="tab-content">
+    <div class="tab-pane active" id="about" role="tabpanel">
+        <div class="jumbotron fingertip-background text-white">
+            <div class="container">
+                <h1 class="display-4">Know your apps</h1>
+                <p>The abundance of mobile apps may mean redundancy. Appcestry helps you study the relations between
+                    apps.</p>
+                <p>
+                    <a class="btn btn-info goToTabConvert" href="#" role="button">Convert Android apps to AppGenes
+                        &raquo;</a>
+                    <a class="btn btn-info goToTabCompare" href="#" role="button">Compare AppGenes &raquo;</a>
+                </p>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h3>Appcestry</h3>
+                    <p>
+                        Ancestry, a portmanteau of “app” and “ancestry”, is a tool for extracting features from Android
+                        APKs for similarity detection. So far, Appcestry supports Android apps and 1-to-1 comparison.
+                        AppGene is a file in JSON format containing the features of an APK and may be ingested into
+                        other tools for analysis.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <h3>Two simple steps</h3>
+                    <p>Measure app similarities in two steps:</p>
+                    <ul>
+                        <li><strong>Step 1:</strong> Convert Android apps (APK files) to AppGene files
+                            <a href="#" class="goToTabConvert">&raquo;</a>
+                        </li>
+                        <li><strong>Step 2:</strong> Compare the AppGene files
+                            <a href="#" class="goToTabCompare">&raquo;</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-5">
+                <div class="col-sm-10 col-md-8 text-secondary">
+                    <h4>Licences and Credits</h4>
+                    <small>
+                        <p>
+                            Appcestry is an <a href="https://github.com/jason-chao/appcestry" target="_blank">open
+                            source
+                            project</a> started by
+                            <a href="https://jasontc.net/" target="_blank">Jason CHAO</a> for his Master's dissertation.
+                            Appcestry, excluding the linked libraries, is released under <a
+                                href="https://opensource.org/licenses/MIT" target="_blank">MIT licence.</a></p>
+                        <p>
+                            Appcestry is mainly dependent on open source projects of
+                            <a href="https://ibotpeaches.github.io/Apktool/" target="_blank">Apktool</a> under Apache
+                            Licnece 2.0;
+                            <a href="http://www.antlr.org/" target="_blank">ANother Tool for Language Recognition</a>
+                            under BSD licence;
+                            <a href="https://github.com/JohannesBuchner/imagehash" target="_blank">ImageHash</a> under
+                            BSD 2-clause licence;
+                            <a href="http://scikit-learn.org" target="_blank">SciKit-Learn</a> under BSD licence;
+                            <a href="http://www.numpy.org/" target="_blank">NumPy</a> under BSD-new licence;
+                            <a href="http://www.pythonware.com/products/pil/" target="_blank">PIL</a> under PIL license;
+                            <a href="https://dask.pydata.org" target="_blank">Dask</a> under BSD 3-clause licence;
+                            <a href="http://python-rq.org/" target="_blank">RQ</a> under BSD licence;
+                            <a href="http://flask.pocoo.org/" target="_blank">Flask</a> under BSD licence;
+                            <a href="https://github.com/daniruiz/flat-remix" target="_blank">Flat-Remix</a> under GNU
+                            GPL v3.0;
+                            Drawings by <a href="https://pixabay.com/en/users/mcmurryjulie-2375405/?tab=about"
+                                           target="_blank">mcmurryjulie</a>
+                            under CC0;
+                            Image by <a href="http://Japanexperterna.se" target="_blank">Japanexperterna</a> under
+                            CC-BY-SA;
+                            and other software packages not listed here for brevity.
+                        </p>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane" id="extract" role="tabpanel">
+        <div class="container" id="apkConverter">
+            <div class="row mt-4 mb-3">
+                <div class="col-12">
+                    <h2>Convert Android Apps (APKs) to AppGenes</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <form class="dropzone bot-background" id="apk-uploader">
+                        <div class="dz-message" data-dz-message>
+                            <div class="row">
+                                <div class="offset-col-1 col-9 text-info text-enter">
+                                    Drop APK files here to convert
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row mt-3 mb-3">
+                <div class="mx-auto">
+                    <button type="button" data-toggle="tooltip" data-placement="top"
+                            title="Update" class="btn btn-link" id="refreshConversionDashboardButton"><i
+                            class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row" id="conversionJobsDashboard">
+                <div class="col-12">
+                    <div class="list-group">
+                        <div v-for="job in jobList" class="mb-1">
+                            <div class="list-group-item" v-bind:class="job.itemDisplayClass">
+                                <div class="d-flex flex-row" data-toggle="collapse"
+                                     v-bind:data-target="'#job_' + job.jobIDHash + '_details'">
+                                    <div class="mr-auto p-1">
+                                        ID: {{ job.jobid }}
+                                    </div>
+                                    <div class="p-1">
+                                        <strong>{{ job.display_status }}</strong>
+                                        <i class="fas fa-angle-down"></i>
+                                    </div>
+                                </div>
+                                <div class="collapse" v-bind:id="'job_' + job.jobIDHash + '_details'">
+                                    <div class="d-flex flex-row">
+                                        <div class="pl-3 mr-auto">
+                                            <ul class="list-unstyled">
+                                                <li v-for="filelink in job.filelinks" v-if="job.filelinks">
+                                                    <a v-bind:class="job.textDisplayClass" target="_blank"
+                                                       v-bind:href="filelink.link" v-bind:download="filelink.filename">{{
+                                                        filelink.title
+                                                        }}</a>
+                                                </li>
+                                                <li v-for="filename in job.files" v-if="(!job.filelinks)">
+                                                    <small>{{ filename }}</small>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="p-1" v-bind:class="job.textDisplayClass">
+                                            <div v-if="job.zipLink">
+                                                <strong><a data-toggle="tooltip"
+                                                           data-placement="bottom"
+                                                           title="Download all in a ZIP file" target="_blank"
+                                                           v-bind:class="job.textDisplayClass"
+                                                           v-bind:href="job.zipLink"
+                                                           v-bind:download="job.zipFilename">
+                                                    <i class="fas fa-file-archive"></i>
+                                                    Download
+                                                </a></strong>
+                                            </div>
+                                            <small v-if="job.conversionSucceeded > 0" class="mt-2">
+                                                <i class="fas fa-check-circle"></i> {{ job.conversionSucceeded }}
+                                            </small>
+                                            <small v-if="job.conversionFailed > 0" class="mt-2" data-toggle="tooltip"
+                                                   data-placement="bottom"
+                                                   title="Caution: Some files were not converted">
+                                                <i class="fas fa-exclamation-circle"></i> {{ job.conversionFailed }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane" id="compare" role="tabpanel">
+        <div class="container" id="appGeneComparator">
+            <div class="row mt-4 mb-3">
+                <div class="col-12">
+                    <h2>Compare AppGenes</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <form class="dropzone genetest-background" id="appgene-uploader">
+                        <div class="dz-message" data-dz-message>
+                            <div class="row">
+                                <div class="offset-col-1 col-9 text-info text-enter">
+                                    Drop AppGene files (maybe zipped) here to compare
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row mt-3 mb-3">
+                <div class="mx-auto">
+                    <button type="button" class="btn btn-link" id="refreshComparisonDashboardButton"
+                            data-toggle="tooltip" data-placement="top" title="Update">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <a href="#" class="btn btn-link" id="downloadAllComparisonsLink" data-toggle="tooltip"
+                       data-placement="top" title="Download all in a single CSV file" hidden>
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <button type="button" class="btn btn-link" id="clearComparisonDashboardButton"
+                            data-toggle="tooltip" data-placement="top" title="Clear">
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="comparisonJobsDashboard">
+                <div class="row justify-content-center">
+                    <div v-for="theAlert in alertList"
+                         v-bind:class="'col-11 text-justify alert alert-' + theAlert.colourCode" role="alert">
+                        <strong>{{ theAlert.title }}</strong>
+                        {{ theAlert.message }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="list-group">
+                            <div v-for="result in resultList" class="mb-2">
+                                <div class="alert alert-success text-center">
+                                    <div class="row">
+                                        <div class="col">
+                                            <h5>
+                                                {{ result.pair[0].id }}
+                                                <a v-bind:href="result.pair[0].link" target="_blank"
+                                                   class="text-success">
+                                                    <small><i class="fas fa-link"></i></small>
+                                                </a>
+                                                <span class="badge badge-pill badge-light">v{{ result.pair[0].version }}</span>
+                                                <em>vis-à-vis</em> {{ result.pair[1].id }}
+                                                <a v-bind:href="result.pair[1].link" target="_blank"
+                                                   class="text-success">
+                                                    <small><i class="fas fa-link"></i></small>
+                                                </a>
+                                                <span class="badge badge-pill badge-light">v{{ result.pair[1].version }}</span>
+                                            </h5>
+                                        </div>
+                                        <div class="col-1">
+                                            <a href="#" data-toggle="tooltip" data-placement="top" target="_blank"
+                                               v-bind:href="result.CSV_url" v-bind:download="result.CSV_filename"
+                                               title="Download as CSV file" class="text-success"><i
+                                                    class="fas fa-download"></i></a>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div v-for="measurement in result.measurementBars">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-md-5 col-lg-4 col-xl-3 text-right">
+                                                {{ measurement.title }}
+                                            </div>
+                                            <div class="col-sm col-md col-lg col-xl">
+                                                <div class="progress" data-toggle="tooltip" data-placement="top"
+                                                     v-bind:title="measurement.tooltipText">
+                                                    <div v-bind:class="'progress-bar bg-' + measurement.colourCode"
+                                                         v-bind:style="'width: ' + measurement.value + '%'"
+                                                         role="progressbar" v-bind:aria-valuenow="measurement.value"
+                                                         aria-valuemin="0" aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-md-2 col-lg-2 col-xl-1">
+                                                {{ measurement.value }}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="index.js"></script>
 </body>
 </html>

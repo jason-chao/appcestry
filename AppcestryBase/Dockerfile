@@ -8,7 +8,7 @@ COPY . ./
 RUN apt-get update && apt-get install apktool -y \
     wdiff=1.2.2-2 \
     python3=3.6.5-3 \
-    python3-pip=9.0.1-2 \
+    python3-pip=9.0.1-2.3~ubuntu1 \
     openjdk-8-jre=8u171-b11-0ubuntu0.18.04.1 \
     apktool=2.3.1+dfsg-1 \
     locales=2.27-3ubuntu1

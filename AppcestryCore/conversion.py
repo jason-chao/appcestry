@@ -5,6 +5,7 @@ import os
 import json
 import random
 import datetime
+from ruamel.yaml import YAML
 from xml.etree import ElementTree as ET
 
 thisProgramPath = os.path.realpath(os.path.curdir)
@@ -74,6 +75,15 @@ def loadObjectFromJSONFile(filename):
     return {}
 
 
+def readVersionCode(toolYmalFilename):
+    if os.path.exists(toolYmalFilename):
+        yaml = YAML()
+        fileContent = readFileContent(toolYmalFilename, "r")
+        apkToolOutput = yaml.load(fileContent)
+        return apkToolOutput["versionInfo"]["versionCode"]
+    return "-1"
+
+
 def ConvertApkToAppgeneFile(apkFilename, outputDir):
     startTime = datetime.datetime.utcnow()
     writeInfoOutput("Disassembling ...")
@@ -83,6 +93,7 @@ def ConvertApkToAppgeneFile(apkFilename, outputDir):
     manifestDoc = ET.parse(os.path.join(apkDir, "AndroidManifest.xml"))
     manifestNode = manifestDoc.getroot()
     appID = manifestNode.attrib["package"]
+    appVersionCode = readVersionCode(os.path.join(apkDir, "apktool.yml"))
     # upNodes = manifestNode.findall("uses-permission")
     permissionList = [n.attrib["{http://schemas.android.com/apk/res/android}name"] for n in
                       manifestNode.findall("uses-permission") if
@@ -114,6 +125,7 @@ def ConvertApkToAppgeneFile(apkFilename, outputDir):
 
     appGeneObject = {
         "appID": appID,
+        "appVersion": appVersionCode,
         "smali": readFileContent(transformedSmaliFilename, "r"),
         "markup": loadObjectFromJSONFile(transformedXMLFilename),
         "media": loadObjectFromJSONFile(hashedMediaFilename),

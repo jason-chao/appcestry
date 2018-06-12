@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 
-from flask import Flask, request, send_file, url_for, redirect
+from flask import Flask, request, send_file, url_for, redirect, Response
+from flask_cors import CORS
 from werkzeug import secure_filename
 import datetime
 from rq import Queue
@@ -11,14 +12,23 @@ import os
 import json
 import zipfile
 import shutil
-
+import socket
+import logging
+import string
+import random
+import numpy
 
 app = Flask(__name__)
-
+CORS(app)
 
 convertQueue = None
 compareQueue = None
 tempDir = "/tmp/appcestry/"
+jobExpirySec = 86400
+jobTimeoutSec = 3600
+
+alphanumericChars = string.ascii_letters + string.digits
+jobIDRandomSuffixLength = 6
 
 
 def saveApkFile(f):
@@ -82,13 +92,14 @@ def respondToStatusEnquiry(job):
         if job.result is not None:
             jobStatus["result"] = job.result
     else:
-        jobStatus["status"] = "invalid_id"
-    return json.dumps(jobStatus)
+        jobStatus["status"] = "invalid"
+    return Response(json.dumps(jobStatus), status=200, mimetype="application/json")
 
 
 @app.route("/", methods=["GET"])
 def landing_page():
-    return "Hi, the time now is {}\n".format(datetime.datetime.utcnow().isoformat())
+    return Response("Hi, the time now is {}\n".format(datetime.datetime.utcnow().isoformat()), status=200,
+                    mimetype="text/plain")
 
 
 @app.route("/tmpFile/<filename>", methods=["GET"])
@@ -107,20 +118,21 @@ def upload_temp_file():
 
 
 @app.route("/compare", methods=["POST"])
-def convert():
+def compare_appgene():
     resultObject = {"jobid": "no_job", "message": None, "filesOnServer": []}
     filenameList = []
 
-    if "file[]" in request.files:
-        files = request.files.getlist("file[]")
-        filenameList.extend([saveAppgeneFile(f) for f in files])
-    elif "file" in request.files:
-        f = request.files["file"]
-        filenameList.extend(unzipAppgeneFiles(f))
+    for fileKey in request.files:
+        if request.files[fileKey].filename.lower().endswith(".appgene"):
+            filenameList.append(saveAppgeneFile(request.files[fileKey]))
+        elif request.files[fileKey].filename.lower().endswith(".zip"):
+            filenameList.extend(unzipAppgeneFiles(request.files[fileKey]))
 
     if len(filenameList) > 1:
-        jobIdentifier = secure_filename("{}_{}".format(request.remote_addr, getSafeTimestamp()))
-        compareQueue.enqueue_call(func=executor.compare_genes, args=(filenameList,), job_id=jobIdentifier)
+        jobIdentifier = secure_filename("{}_{}".format(getSafeTimestamp(), "".join(
+            numpy.random.choice(list(alphanumericChars), size=jobIDRandomSuffixLength))))
+        compareQueue.enqueue_call(func=executor.compare_genes, args=(filenameList,), job_id=jobIdentifier,
+                                  result_ttl=jobExpirySec)
         resultObject["message"] = "Please open {} to check the result".format(
             url_for("comparison_result", job_id=jobIdentifier))
         resultObject["jobid"] = jobIdentifier
@@ -130,7 +142,7 @@ def convert():
     else:
         resultObject["message"] = "No valid files or comparison"
 
-    return json.dumps(resultObject)
+    return Response(json.dumps(resultObject), status=200, mimetype="application/json")
 
 
 @app.route("/compare/<job_id>", methods=["GET"])
@@ -142,19 +154,20 @@ def comparison_result(job_id):
 @app.route("/convert", methods=["POST"])
 def convert_apk():
     filenameList = []
-    if "file[]" in request.files:
-        files = request.files.getlist("file[]")
-        filenameList.extend([saveApkFile(f) for f in files])
-    elif "file" in request.files:
-        f = request.files["file"]
-        filenameList.append(saveApkFile(f))
-    jobIdentifier = secure_filename("{}_{}".format(request.remote_addr, getSafeTimestamp()))
-    convertQueue.enqueue_call(func=executor.convert_batch, args=(filenameList,), job_id=jobIdentifier)
+
+    for fileKey in request.files:
+        if request.files[fileKey].filename.lower().endswith(".apk"):
+            filenameList.append(saveApkFile(request.files[fileKey]))
+
+    jobIdentifier = secure_filename("{}_{}".format(getSafeTimestamp(), "".join(
+        numpy.random.choice(list(alphanumericChars), size=jobIDRandomSuffixLength))))
+    if len(filenameList) > 0:
+        convertQueue.enqueue_call(func=executor.convert_batch, args=(filenameList,), job_id=jobIdentifier,
+                                  result_ttl=jobExpirySec)
     resultObject = {
-        "message": "Please open {} to check the result".format(
-            url_for("conversion_result", job_id=jobIdentifier)), "filesOnServer": filenameList, "jobid": jobIdentifier
+        "filesOnServer": filenameList, "jobid": jobIdentifier
     }
-    return json.dumps(resultObject)
+    return Response(json.dumps(resultObject), status=200, mimetype="application/json")
 
 
 @app.route("/convert/queue", methods=["GET"])
@@ -180,10 +193,13 @@ def conversion_result(job_id):
 
 
 if __name__ == "__main__":
-    print("temporary director: {}\n".format(tempDir))
-    redisConnection = os.getenv("APPCESTRY_REDIS_HTTP_SERVER_CONNECION", "127.0.0.1")
-    httpListenOnPort = int(os.getenv("APPCESTRY_HTTP_LISTENING_PORT", "8080"))
-    httpListenAtAddress = os.getenv("APPCESTRY_HTTP_LISTENING_ADDR", "127.0.0.1")
-    convertQueue = Queue("convert", connection=Redis(redisConnection))
-    compareQueue = Queue("compare", connection=Redis(redisConnection))
+    app.logger.setLevel(logging.INFO)
+    myIpAddress = socket.gethostbyname(socket.gethostname())
+    app.logger.info("Temporary directory: {}\n".format(tempDir))
+    redisConnection = os.getenv("APPCESTRY_REDIS_HTTP_SERVER_CONNECION", myIpAddress)
+    httpListenOnPort = int(os.getenv("APPCESTRY_HTTP_LISTENING_PORT", "8899"))
+    httpListenAtAddress = os.getenv("APPCESTRY_HTTP_LISTENING_ADDR", myIpAddress)
+    app.logger.info("URL: http://{}:{}/\n".format(myIpAddress, httpListenOnPort))
+    convertQueue = Queue("convert", connection=Redis(redisConnection), default_timeout=jobTimeoutSec)
+    compareQueue = Queue("compare", connection=Redis(redisConnection), default_timeout=jobTimeoutSec)
     app.run(httpListenAtAddress, httpListenOnPort, debug=True)

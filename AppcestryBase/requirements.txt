@@ -14,3 +14,5 @@ rq==0.10.0
 rq_dashboard==0.3.11
 distributed==1.21.8
 requests==2.18.4
+flask-cors==3.0.3
+ruamel.yaml==0.15.35
