@@ -7,7 +7,7 @@ var comparisonJobList = [];
 var conversionJobDashboard = null;
 var comparisonJobDashboard = null;
 const linkToAppDetails = "http://play.google.com/store/apps/details?id=";
-
+const uploadTimeoutMS = 50 * 60 * 1000;
 
 function refreshComparisonJobs() {
 
@@ -44,7 +44,10 @@ function getCSVFileContent(comparisonObj) {
 }
 
 function getCSVRowString(title, measurementObj) {
-    return `${title}, ${measurementObj["ratio"]}, ${measurementObj["intersection"]}, ${measurementObj["union"]}`;
+    if (measurementObj)
+        return `${title}, ${measurementObj["ratio"]}, ${measurementObj["intersection"]}, ${measurementObj["union"]}`;
+    else
+        return `${title}, 0, 0, 0}`;
 }
 
 function getMeasurementTooltipText(measurementResult) {
@@ -208,61 +211,85 @@ $(document).ready(function () {
 
                                 comparisonObj["measurementBars"] = [];
 
-                                comparisonObj["measurementBars"].push({
-                                    title: "Namespaces",
-                                    value: getPercentageFromRatio(comparisonObj["namespace"]["ratio"]),
-                                    colourCode: getColourCodeByRatio(comparisonObj["namespace"]["ratio"]),
-                                    tooltipText: getMeasurementTooltipText(comparisonObj["namespace"])
-                                });
+                                if (comparisonObj["namespace"]) {
+                                    comparisonObj["measurementBars"].push({
+                                        title: "Namespaces",
+                                        value: getPercentageFromRatio(comparisonObj["namespace"]["ratio"]),
+                                        colourCode: getColourCodeByRatio(comparisonObj["namespace"]["ratio"]),
+                                        tooltipText: getMeasurementTooltipText(comparisonObj["namespace"])
+                                    });
+                                }
 
-                                comparisonObj["measurementBars"].push({
-                                    title: "Exact duplicate files",
-                                    value: getPercentageFromRatio(comparisonObj["media"]["exactDuplicates"]["ratio"]),
-                                    colourCode: getColourCodeByRatio(comparisonObj["media"]["exactDuplicates"]["ratio"]),
-                                    tooltipText: getMeasurementTooltipText(comparisonObj["media"]["exactDuplicates"])
-                                });
+                                if (comparisonObj["media"]) {
+                                    if (comparisonObj["media"]["exactDuplicates"]) {
+                                        comparisonObj["measurementBars"].push({
+                                            title: "Exact duplicate files",
+                                            value: getPercentageFromRatio(comparisonObj["media"]["exactDuplicates"]["ratio"]),
+                                            colourCode: getColourCodeByRatio(comparisonObj["media"]["exactDuplicates"]["ratio"]),
+                                            tooltipText: getMeasurementTooltipText(comparisonObj["media"]["exactDuplicates"])
+                                        });
+                                    }
 
-                                comparisonObj["measurementBars"].push({
-                                    title: "Near duplicate images",
-                                    value: getPercentageFromRatio(comparisonObj["media"]["nearDuplicates"]["ratio"]),
-                                    colourCode: getColourCodeByRatio(comparisonObj["media"]["nearDuplicates"]["ratio"]),
-                                    tooltipText: getMeasurementTooltipText(comparisonObj["media"]["nearDuplicates"])
-                                });
+                                    if (comparisonObj["media"]["nearDuplicates"]) {
+                                        comparisonObj["measurementBars"].push({
+                                            title: "Near duplicate images",
+                                            value: getPercentageFromRatio(comparisonObj["media"]["nearDuplicates"]["ratio"]),
+                                            colourCode: getColourCodeByRatio(comparisonObj["media"]["nearDuplicates"]["ratio"]),
+                                            tooltipText: getMeasurementTooltipText(comparisonObj["media"]["nearDuplicates"])
+                                        });
+                                    }
+                                }
 
-                                comparisonObj["measurementBars"].push({
-                                    title: "Permissions (Android)",
-                                    value: getPercentageFromRatio(comparisonObj["permission"]["android"]["ratio"]),
-                                    colourCode: getColourCodeByRatio(comparisonObj["permission"]["android"]["ratio"]),
-                                    tooltipText: getMeasurementTooltipText(comparisonObj["permission"]["android"])
-                                });
+                                if (comparisonObj["permission"]) {
+                                    if (comparisonObj["permission"]["android"]) {
+                                        comparisonObj["measurementBars"].push({
+                                            title: "Permissions (Android)",
+                                            value: getPercentageFromRatio(comparisonObj["permission"]["android"]["ratio"]),
+                                            colourCode: getColourCodeByRatio(comparisonObj["permission"]["android"]["ratio"]),
+                                            tooltipText: getMeasurementTooltipText(comparisonObj["permission"]["android"])
+                                        });
+                                    }
 
-                                comparisonObj["measurementBars"].push({
-                                    title: "Permissions (non-Android)",
-                                    value: getPercentageFromRatio(comparisonObj["permission"]["non-android"]["ratio"]),
-                                    colourCode: getColourCodeByRatio(comparisonObj["permission"]["non-android"]["ratio"]),
-                                    tooltipText: getMeasurementTooltipText(comparisonObj["permission"]["non-android"])
-                                });
+                                    if (comparisonObj["permission"]["non-android"]) {
+                                        comparisonObj["measurementBars"].push({
+                                            title: "Permissions (non-Android)",
+                                            value: getPercentageFromRatio(comparisonObj["permission"]["non-android"]["ratio"]),
+                                            colourCode: getColourCodeByRatio(comparisonObj["permission"]["non-android"]["ratio"]),
+                                            tooltipText: getMeasurementTooltipText(comparisonObj["permission"]["non-android"])
+                                        });
+                                    }
+                                }
 
-                                comparisonObj["measurementBars"].push({
-                                    title: "Bytecode (estimate)",
-                                    value: getPercentageFromRatio(comparisonObj["smali"]["byLine"]["ratio"]),
-                                    colourCode: getColourCodeByRatio(comparisonObj["smali"]["byLine"]["ratio"]),
-                                    tooltipText: getMeasurementTooltipText(comparisonObj["smali"]["byLine"])
-                                });
+                                if (comparisonObj["smali"]) {
+                                    if (comparisonObj["smali"]["byLine"]) {
+                                        comparisonObj["measurementBars"].push({
+                                            title: "Bytecode (estimate)",
+                                            value: getPercentageFromRatio(comparisonObj["smali"]["byLine"]["ratio"]),
+                                            colourCode: getColourCodeByRatio(comparisonObj["smali"]["byLine"]["ratio"]),
+                                            tooltipText: getMeasurementTooltipText(comparisonObj["smali"]["byLine"])
+                                        });
+                                    }
+                                }
 
-                                comparisonObj["measurementBars"].push({
-                                    title: "XML attribute names",
-                                    value: getPercentageFromRatio(comparisonObj["markup"]["names"]["ratio"]),
-                                    colourCode: getColourCodeByRatio(comparisonObj["markup"]["names"]["ratio"]),
-                                    tooltipText: getMeasurementTooltipText(comparisonObj["markup"]["names"])
-                                });
+                                if (comparisonObj["markup"]) {
+                                    if (comparisonObj["markup"]["names"]) {
+                                        comparisonObj["measurementBars"].push({
+                                            title: "XML attribute names",
+                                            value: getPercentageFromRatio(comparisonObj["markup"]["names"]["ratio"]),
+                                            colourCode: getColourCodeByRatio(comparisonObj["markup"]["names"]["ratio"]),
+                                            tooltipText: getMeasurementTooltipText(comparisonObj["markup"]["names"])
+                                        });
+                                    }
 
-                                comparisonObj["measurementBars"].push({
-                                    title: "XML attribute values",
-                                    value: getPercentageFromRatio(comparisonObj["markup"]["values"]["ratio"]),
-                                    colourCode: getColourCodeByRatio(comparisonObj["markup"]["values"]["ratio"]),
-                                    tooltipText: getMeasurementTooltipText(comparisonObj["markup"]["values"])
-                                });
+                                    if (comparisonObj["markup"]["values"]) {
+                                        comparisonObj["measurementBars"].push({
+                                            title: "XML attribute values",
+                                            value: getPercentageFromRatio(comparisonObj["markup"]["values"]["ratio"]),
+                                            colourCode: getColourCodeByRatio(comparisonObj["markup"]["values"]["ratio"]),
+                                            tooltipText: getMeasurementTooltipText(comparisonObj["markup"]["values"])
+                                        });
+                                    }
+                                }
 
                                 let csvText = getCSVFileContent(comparisonObj);
                                 let csvAsBlob = new Blob([csvText], {type: "text/csv"});
@@ -300,7 +327,9 @@ $(document).ready(function () {
     var apkFileDrop = new Dropzone("#apk-uploader", {
         url: baseUrl + "convert",
         uploadMultiple: true,
-        parallelUploads: 30
+        parallelUploads: 100,
+        maxFilesize: 1024,
+        timeout: uploadTimeoutMS
     });
     apkFileDrop.on("success", function (file, result) {
         if (conversionJobList.find(function (rj) {
@@ -320,7 +349,9 @@ $(document).ready(function () {
 
     var appGeneFileDrop = new Dropzone("#appgene-uploader", {
         url: baseUrl + "compare",
-        uploadMultiple: true, parallelUploads: 50
+        uploadMultiple: true, parallelUploads: 100,
+        maxFilesize: 1024,
+        timeout: uploadTimeoutMS
     });
     appGeneFileDrop.on("success", function (file, result) {
         if (comparisonJobList.find(function (rj) {
