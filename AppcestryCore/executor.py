@@ -84,7 +84,7 @@ def convertSingleApk(filename):
             appGenefilename = fullFilename
             break
     if appGenefilename:
-        conversionResult["genefilename"] = "{}_{}".format(getSafeTimestamp(), os.path.basename(appGenefilename))
+        conversionResult["genefilename"] = "{}___{}".format(getSafeTimestamp(), os.path.basename(appGenefilename))
         os.rename(appGenefilename, os.path.join(tempProcessingDir, conversionResult["genefilename"]))
         fileHandler = open(os.path.join(tempProcessingDir, conversionResult["genefilename"]), "rb")
         requests.post(url=fileUploadBaseUrl, files={"file": fileHandler})

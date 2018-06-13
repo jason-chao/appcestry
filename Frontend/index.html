@@ -170,7 +170,7 @@
                                             <ul class="list-unstyled">
                                                 <li v-for="filelink in job.filelinks" v-if="job.filelinks">
                                                     <a v-bind:class="job.textDisplayClass" target="_blank"
-                                                       v-bind:href="filelink.link" v-bind:download="filelink.filename">{{
+                                                       v-bind:href="filelink.link" v-bind:download="filelink.title">{{
                                                         filelink.title
                                                         }}</a>
                                                 </li>

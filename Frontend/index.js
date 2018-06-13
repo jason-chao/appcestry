@@ -123,13 +123,13 @@ $(document).ready(function () {
 
                     if (displayObject["files"]) {
                         for (let fi = 0; fi < displayObject["files"].length; fi++) {
-                            displayObject["files"][fi] = (displayObject["files"][fi]).split("_").pop();
+                            displayObject["files"][fi] = (displayObject["files"][fi]).split("___").pop();
                         }
                     }
 
                     if (displayObject["filelinks"]) {
                         for (let fi = 0; fi < displayObject["filelinks"].length; fi++) {
-                            displayObject["filelinks"][fi]["title"] = displayObject["filelinks"][fi]["title"].split("_").pop();
+                            displayObject["filelinks"][fi]["title"] = displayObject["filelinks"][fi]["title"].split("___").pop();
                         }
                     }
 

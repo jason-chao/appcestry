@@ -32,7 +32,7 @@ jobIDRandomSuffixLength = 6
 
 
 def saveApkFile(f):
-    baseFilename = "apk_{}_{}".format(getSafeTimestamp(), secure_filename(f.filename))
+    baseFilename = "apk___{}___{}".format(getSafeTimestamp(), secure_filename(f.filename))
     filename = os.path.join(tempDir, baseFilename)
     f.save(filename)
     return baseFilename
@@ -76,7 +76,7 @@ def zipJobFiles(jobID, filenameList):
     if not os.path.exists(zipFilename):
         with zipfile.ZipFile(os.path.join(tempDir, zipFilename), mode="w", compression=zipfile.ZIP_STORED) as zf:
             for f in filenameList:
-                zf.write(os.path.join(tempDir, f), arcname=f)
+                zf.write(os.path.join(tempDir, f), arcname=f.split("___").pop())
     return zipFilename
 
 
