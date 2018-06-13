@@ -138,7 +138,7 @@ def ConvertApkToAppgeneFile(apkFilename, outputDir):
     }
 
     writeInfoOutput("Saving the AppGene ...")
-    thisAppGeneFilename = os.path.join(outputDir, "{}.appgene".format(appID))
+    thisAppGeneFilename = os.path.join(outputDir, "{}-{}.appgene".format(appID, appVersionCode))
     appGeneExportFile = open(thisAppGeneFilename, "w")
     json.dump(appGeneObject, appGeneExportFile, ensure_ascii=False, separators=(",", ":"))
     appGeneExportFile.close()
