@@ -37,12 +37,12 @@ def extractValuePairs(rootDir):
                     attributeName.append(node.tag)
                 if node.text:
                     trimmedText = node.text.strip().replace("\n", " ")
-                if trimmedText:
-                    attributeValue.append(trimmedText)
-                    for attribKey in node.attrib.keys():
-                        attributeName.append(attribKey)
-                        if node.attrib[attribKey]:
-                            attributeValue.append(node.attrib[attribKey])
+                    if trimmedText:
+                        attributeValue.append(trimmedText)
+                for attribKey in node.attrib.keys():
+                    attributeName.append(attribKey)
+                    if node.attrib[attribKey]:
+                        attributeValue.append(node.attrib[attribKey])
             attributeName = list(set(attributeName))
             attributeValue = list(set(attributeValue))
         except:
