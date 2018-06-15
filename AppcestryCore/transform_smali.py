@@ -348,8 +348,11 @@ class SmaliTransformer(SmaliListener):
 
 
 def TransformMergedSmaliFile(inputFilename, outputFilename):
-
+    #inputFile = open(inputFilename, "r")
+    #smaliContent = inputFile.read()
+    #inputFile.close()
     lexer = SmaliLexer(FileStream(inputFilename, encoding="utf-8"))
+    #lexer = SmaliLexer(InputStream(smaliContent))
     tokens = CommonTokenStream(lexer)
     parser = SmaliParser(tokens)
     tree = parser.sFiles()

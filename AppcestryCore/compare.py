@@ -13,6 +13,7 @@ from pprint import pprint
 import itertools
 import gc
 import random
+import hashlib
 
 hashFeatureNumber = 2 ** 16
 nGramRange = (16, 16)
@@ -52,6 +53,15 @@ def writeTextToBufferDir(baseFilename, text):
     bufferFile.write(text)
     bufferFile.close()
     return bufferFilename
+
+
+def getTextSHA256(plaintext):
+    textHash = hashlib.sha256(plaintext)
+    return "%s" % textHash.hexdigest()
+
+
+def getHashInArray(arr):
+    return [getTextSHA256(t.encode("utf-8")) for t in arr]
 
 
 def diffContentPairAsFiles(file1Content, file2Content):
@@ -106,46 +116,75 @@ def getJaccardSimilarity(arr1, arr2):
     return jaccardSimResult
 
 
+def getEmptyJaccardResult():
+    return {"ratio": 0, "intersection": 0, "union": 0}
+
+
 def compareGenes(gene1, gene2):
     result = {"smali": {}, "namespace": {}, "markup": {}, "media": {}, "permission": {}}
 
     try:
-
         print("Comparing vectorised code ...")
         result["smali"]["cosineSimilarity"] = cosine_similarity(gene1["features"]["smaliVector"],
                                                                 gene2["features"]["smaliVector"]).item(0)
+    except:
+        print("Failed to compare vectorised code")
+        result["smali"]["cosineSimilarity"] = 0
 
+    try:
         print("Comparing disassembled code ...")
         result["smali"]["byLine"] = diffContentPairAsFiles(gene1["smali"].replace(" ", "_"),
                                                            gene2["smali"].replace(" ", "_"))
 
         result["smali"]["1-gram"] = diffContentPairAsFiles(gene1["smali"].replace("\n", " "),
                                                            gene2["smali"].replace("\n", " "))
+    except:
+        print("Failed to compare disassembled code")
+        result["smali"]["byLine"] = getEmptyJaccardResult()
+        result["smali"]["1-gram"] = getEmptyJaccardResult()
 
-        print("Comparing name spaces ...")
-        result["namespace"] = getJaccardSimilarity(gene1["namespace"], gene2["namespace"])
-
-        print("Comparing markup files ...")
-        result["markup"]["names"] = getJaccardSimilarity(gene1["markup"]["names"], gene2["markup"]["names"])
-        result["markup"]["values"] = getJaccardSimilarity(gene1["markup"]["values"], gene2["markup"]["values"])
-
-        print("Comparing media files ...")
-        result["media"]["exactDuplicates"] = getJaccardSimilarity(gene1["features"]["media_sha256"],
-                                                                  gene2["features"]["media_sha256"])
-
-        result["media"]["nearDuplicates"] = getJaccardSimilarity(gene1["features"]["media_phash"],
-                                                                 gene2["features"]["media_phash"])
-
-        print("Comparing permissions and features ...")
+    try:
+        print("Comparing permissions ...")
         result["permission"] = {
             "android": getJaccardSimilarity([pf for pf in gene1["permission-feature"] if pf.startswith("android.")],
                                             [pf for pf in gene2["permission-feature"] if pf.startswith("android.")]),
             "non-android": getJaccardSimilarity(
                 [pf for pf in gene1["permission-feature"] if not pf.startswith("android.")],
                 [pf for pf in gene2["permission-feature"] if not pf.startswith("android.")])}
-
     except:
-        print("Feature comparison failed")
+        print("Failed to compare permissions")
+        result["permission"]["android"] = getEmptyJaccardResult()
+        result["permission"]["non-android"] = getEmptyJaccardResult()
+
+    try:
+        print("Comparing namespaces ...")
+        result["namespace"] = getJaccardSimilarity(gene1["namespace"], gene2["namespace"])
+    except:
+        print("Failed to compare namespaces")
+        result["namespace"] = getEmptyJaccardResult()
+
+    try:
+        print("Comparing media files ...")
+        result["media"]["exactDuplicates"] = getJaccardSimilarity(gene1["features"]["media_sha256"],
+                                                                  gene2["features"]["media_sha256"])
+
+        result["media"]["nearDuplicates"] = getJaccardSimilarity(gene1["features"]["media_phash"],
+                                                                 gene2["features"]["media_phash"])
+    except:
+        print("Failed to media files")
+        result["media"]["exactDuplicates"] = getEmptyJaccardResult()
+        result["media"]["nearDuplicates"] = getEmptyJaccardResult()
+
+    try:
+        print("Comparing markup files ...")
+        result["markup"]["names"] = getJaccardSimilarity(getHashInArray(gene1["markup"]["names"]),
+                                                         getHashInArray(gene2["markup"]["names"]))
+        result["markup"]["values"] = getJaccardSimilarity(getHashInArray(gene1["markup"]["values"]),
+                                                          getHashInArray(gene2["markup"]["values"]))
+    except:
+        print("Failed to markup files")
+        result["markup"]["names"] = getEmptyJaccardResult()
+        result["markup"]["values"] = getEmptyJaccardResult()
 
     return result
 

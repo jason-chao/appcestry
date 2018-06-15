@@ -17,6 +17,5 @@ COPY rq_worker_*.sh ./
 COPY dask_*.sh ./
 RUN chmod a+x ./*.py
 RUN chmod a+x ./*.sh
-RUN python3 -m compileall
 RUN python3 -m compileall .
 CMD ["/bin/bash"]

@@ -6,7 +6,6 @@ import os
 import xml.etree.ElementTree as ET
 import json
 
-
 valuePrefixToBeKept = ["android.", "com.google"]
 keyOfValuePrefixToBeKept = ["package"]
 nodesToBeDropped = ["data", "meta-data"]
@@ -45,11 +44,21 @@ def readPackageNameFromManifest(filename):
     return xmlRoot.attrib["package"]
 
 
-def getNameSpace(fullSmaliFilename, smaliDirs):
+def getCleanNamespace(namespace):
+    nslevels = namespace.split(".")
+    finalLevel = len(nslevels)
+    for i in range(len(nslevels) - 1, -1, -1):
+        if len(nslevels[i]) > 1:
+            finalLevel = i
+            break
+    return ".".join(nslevels[:(finalLevel + 1)])
+
+
+def getNamespace(fullSmaliFilename, smaliDirs):
     for smaliDir in sorted(smaliDirs, reverse=True):
         if smaliDir in fullSmaliFilename:
             nsPath = os.path.relpath(os.path.dirname(fullSmaliFilename), smaliDir)
-            return nsPath.replace("/", ".")
+            return getCleanNamespace(nsPath.replace("/", "."))
 
 
 def mergeFiles(smaliDirs, packageName, fileToBeMerged, fileForNamespace, includeAllCodes):
@@ -59,7 +68,8 @@ def mergeFiles(smaliDirs, packageName, fileToBeMerged, fileForNamespace, include
     for smaliDir in smaliDirs:
         allCodeFiles.extend(getAllFiles(smaliDir))
 
-    namespaceList = [getNameSpace(sf, smaliDirs) for sf in allCodeFiles]
+    namespaceList = [getNamespace(sf, smaliDirs) for sf in allCodeFiles]
+
     namespaceList = list(set(namespaceList))
 
     nsFile = open(fileForNamespace, "w")
@@ -74,15 +84,18 @@ def mergeFiles(smaliDirs, packageName, fileToBeMerged, fileForNamespace, include
             closestNamespace = namespace
             break
 
+    print("Code in closest namespace: {}".format(closestNamespace))
+
     if not includeAllCodes:
-        allCodeFiles = [cf for cf in allCodeFiles if closestNamespace in getNameSpace(cf, smaliDirs)]
+        allCodeFiles = [cf for cf in allCodeFiles if closestNamespace in getNamespace(cf, smaliDirs)]
 
     smaliFilesByFileSize = sorted([f for f in allCodeFiles
-                                   if os.path.isfile(f) and f.endswith(".smali")],
-                                  key=lambda f: os.path.getsize(f), reverse=True)  # smali files sort by file sizes
+                                   if os.path.isfile(f) and f.endswith(".smali") and (
+                                       not os.path.basename(f).startswith("R$"))], key=lambda f: os.path.getsize(f),
+                                  reverse=True)  # smali files sort by file sizes
 
-    cumulatedSize = 0
     maxFileIndex = None
+    cumulatedSize = 0
     for i in range(len(smaliFilesByFileSize)):
         cumulatedSize = cumulatedSize + os.path.getsize(smaliFilesByFileSize[i])
         if cumulatedSize > smaliSizeLimitInBytes:
@@ -90,11 +103,12 @@ def mergeFiles(smaliDirs, packageName, fileToBeMerged, fileForNamespace, include
             break
 
     if maxFileIndex is not None:
-        smaliFilesByFileSize = [sf for sf in smaliFilesByFileSize[0:(maxFileIndex+1)]]
+        smaliFilesByFileSize = [sf for sf in smaliFilesByFileSize[0:(maxFileIndex + 1)]]
 
-    destinationFile = open(fileToBeMerged, "w")
+    destinationFile = open(fileToBeMerged, "w", encoding="utf-8")
     for smaliFile in smaliFilesByFileSize:
         # print("{}\t{}".format(os.path.getsize(smaliFile), smaliFile))  # to verify the order by file size
+        # destinationFile.write(smaliFile + "\n")
         sourceFile = open(smaliFile, "r")
         for line in sourceFile:
             if (not line.startswith("#")) and (not line == "\n"):

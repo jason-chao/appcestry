@@ -124,6 +124,7 @@ def ConvertApkToAppgeneFile(apkFilename, outputDir):
     hashMedia(apkDir, hashedMediaFilename)
 
     appGeneObject = {
+        "version": "0.0.1",
         "appID": appID,
         "appVersion": appVersionCode,
         "smali": readFileContent(transformedSmaliFilename, "r"),

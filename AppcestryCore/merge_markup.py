@@ -37,12 +37,12 @@ def extractValuePairs(rootDir):
                     attributeName.append(node.tag)
                 if node.text:
                     trimmedText = node.text.strip().replace("\n", " ")
-                    if trimmedText:
-                        attributeValue.append(trimmedText)
-                for attribKey in node.attrib.keys():
-                    attributeName.append(attribKey)
-                    if node.attrib[attribKey]:
-                        attributeValue.append(node.attrib[attribKey])
+                if trimmedText:
+                    attributeValue.append(trimmedText)
+                    for attribKey in node.attrib.keys():
+                        attributeName.append(attribKey)
+                        if node.attrib[attribKey]:
+                            attributeValue.append(node.attrib[attribKey])
             attributeName = list(set(attributeName))
             attributeValue = list(set(attributeValue))
         except:
@@ -57,7 +57,8 @@ def extractValuePairs(rootDir):
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
     argParser.add_argument("--apkDir", help="Root Directory of an APK extracted using APKTOOL", required=True)
-    argParser.add_argument("--outputFile", help="The output file to be saved", type=argparse.FileType("w"), required=True)
+    argParser.add_argument("--outputFile", help="The output file to be saved", type=argparse.FileType("w"),
+                           required=True)
 
     args = argParser.parse_args()
     apkRootDir = os.path.realpath(args.apkDir)
