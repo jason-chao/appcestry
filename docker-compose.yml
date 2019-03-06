@@ -1,12 +1,15 @@
 version: '3'
 
 services:
+  # Redis holds the data about compute-intensive jobs and is mainly used by Redis Queue (RD).
   redis:
     image: redis:alpine
     expose:
       - "6379"
 
   web-frontend:
+    # The user-facing web frontend of Appcestry
+    # Nginx hosts the static content of the UI and works as a reverse proxy for the HTTP-interface.
     image: jasonthc/appcestry-frontend:0.0.1b
     env_file:
       - ./appcestry_cluster.env
@@ -18,6 +21,8 @@ services:
       - "80"
 
   http-interface:
+    # The HTTP-interface passes the data received from web-based UI to Appcestry.
+    # For compute-intensive operations (AppGene conversion and comparison), tasks are stored as Redis Queue (RQ) jobs for rq-worker-* instances to take up.
     image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
@@ -27,7 +32,12 @@ services:
       - "8899"
     entrypoint: /appcestry/app.py
 
+  # For rq-worker-convert and rq-worker-compare:
+  #  A rq-worker has to wait for Dask to complete a job before it can process a next one.
+  #  Scaling a rq-worker to multiple instances is needed to handle multiple requests.
+
   rq-worker-convert:
+    # Worker to pass an AppGene conversion job to dask-scheduler
     image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
@@ -37,6 +47,7 @@ services:
     entrypoint: /appcestry/rq_worker_convert.sh
 
   rq-worker-compare:
+    # Worker to pass an AppGene comparison job to dask-scheduler
     image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
@@ -46,6 +57,7 @@ services:
     entrypoint: /appcestry/rq_worker_compare.sh
 
   dask-scheduler:
+    # Assigning jobs to dask-worker(s) for distributed computing
     image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env
@@ -54,6 +66,9 @@ services:
     command: /appcestry/dask_scheduler.sh
 
   dask-worker:
+    # dask-worker executes tasks assigned by dask-scheduler.
+    # On a single node, tasks are executed in multiple threads.
+    # Or, to distribute the load to a cluster of machines, deploy instances of Dask worker on multiple nodes.
     image: jasonthc/appcestry:0.0.1b
     env_file:
       - ./appcestry_cluster.env

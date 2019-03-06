@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# This script reads result JSON files and rank pairs by similarity.
 
 import json
 import os
@@ -7,6 +8,12 @@ import argparse
 
 
 def getAllFiles(rootDir):
+    """Traverse a directory tree and find all the files.
+       Args:
+         rootDir: The directory to traverse
+       Returns:
+         A list of full filenames for the files
+    """
     fileList = []
     for (dirPath, dirNames, fileNames) in os.walk(rootDir):
         for filename in fileNames:
@@ -15,6 +22,12 @@ def getAllFiles(rootDir):
 
 
 def loadJSONFromFile(filename):
+    """A generic function to read a JSON file.
+       Args:
+         filename: The full filename for the JSON file
+       Returns:
+         The object loaded from JSON
+    """
     jsonFile = open(filename, "r")
     theObject = json.load(jsonFile)
     jsonFile.close()
@@ -23,6 +36,12 @@ def loadJSONFromFile(filename):
 
 
 def getScore(individualResult):
+    """Read a result object and then return a score.  The following weights are experimental.
+       Args:
+         individualResult: AppGene comparison result object
+       Returns:
+         A score
+    """
     score = 0
     score = score + individualResult["smali"]["cosineSimilarity"] * float(0.15)
     score = score + individualResult["namespace"]["ratio"] * float(0.15)
@@ -52,12 +71,24 @@ def getScore(individualResult):
 
 
 def rankedReslts(resultList):
+    """Rank result objects by socre.
+       Args:
+         resultList: A list of result objects
+       Returns:
+         A list of result objects sorted by scores
+    """
     for i in range(len(resultList)):
         resultList[i]["score"] = getScore(resultList[i])
     return sorted(resultList, key=lambda r: r["score"], reverse=True)
 
 
 def listTopResults(resultList):
+    """Print the ranked results.
+       Args:
+         resultList: A list of result objects
+       Returns:
+         None
+    """
     ranked = rankedReslts(resultList)
     for r in ranked:
         print("Score: {} (smali: {}, namespace: {}) for {} - {} in {}".format(r["score"],

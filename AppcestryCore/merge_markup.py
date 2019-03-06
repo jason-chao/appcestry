@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# This script extracts the attribute names and values from markup (XML) files and merges them into a single file.
 
 import argparse
 import os
@@ -10,6 +11,13 @@ import gc
 
 
 def getAllFilesOfExtension(rootDir, extension):
+    """Traverse a directory tree and find all the files with a specified extension
+       Args:
+         rootDir: The directory to traverse
+         extension: The extension
+       Returns:
+         A list of files
+    """
     fileList = []
     for (dirPath, dirNames, fileNames) in os.walk(rootDir):
         for filename in fileNames:
@@ -19,6 +27,12 @@ def getAllFilesOfExtension(rootDir, extension):
 
 
 def readFile(fullPathToFile):
+    """A generic function to read the content of a file.
+       Args:
+         fullPathToFile: The full filename for the file
+       Return:
+         The content
+    """
     fileHandler = open(fullPathToFile, "r")
     content = fileHandler.read()
     fileHandler.close()
@@ -26,6 +40,14 @@ def readFile(fullPathToFile):
 
 
 def extractValuePairs(rootDir):
+    """Traverse a directory tree and find all XML files.  Extract the attribute names and values from these files.
+       Args:
+         rootDir: The directory
+       Returns:
+         An object with two properties:
+           names: Sorted list of attribute names 
+           values: Sorted list of attribute values
+    """
     attributeName = []
     attributeValue = []
     allMarkupFiles = getAllFilesOfExtension(rootDir, ".xml")
@@ -55,6 +77,7 @@ def extractValuePairs(rootDir):
 
 
 if __name__ == '__main__':
+    # The usage of arguemnts is self-explanatory as follows
     argParser = argparse.ArgumentParser()
     argParser.add_argument("--apkDir", help="Root Directory of an APK extracted using APKTOOL", required=True)
     argParser.add_argument("--outputFile", help="The output file to be saved", type=argparse.FileType("w"),

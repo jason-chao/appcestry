@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# This script transforms resource files into hash values.  
+# For still images, pHash (perceptual hash) is used.  For all other types of files, SHA25 is used.
 
 import argparse
 import os
@@ -12,6 +14,13 @@ import hashlib
 
 
 def getAllFilesOfExtension(rootDir, patternRegExp):
+    """Traverse a directory tree and find all the files with a specified extension
+       Args:
+         rootDir: The directory to traverse
+         patternRegExp: Regular expression for extension matching
+       Returns:
+         A list of files
+    """
     fileList = []
     filePatternRe = re.compile(patternRegExp)
     for (dirPath, dirNames, fileNames) in os.walk(rootDir):
@@ -22,6 +31,12 @@ def getAllFilesOfExtension(rootDir, patternRegExp):
 
 
 def getFileSHA256(fileFullPath):
+    """Get the SHA256 hash value of a file
+       Args:
+         fileFullPath: Full filename of a file
+       Returns:
+         Hex hash value in string
+    """
     file = open(fileFullPath, "rb")
     fileContent = file.read()
     fileHash = hashlib.sha256(fileContent)
@@ -30,6 +45,12 @@ def getFileSHA256(fileFullPath):
 
 
 def getImagePHash(imgFileFullPath):
+    """Get the pHash value of an image file
+       Args:
+         fileFullPath: Full filename of an image file
+       Returns:
+         Hex hash value in string
+    """
     try:
         image = Image.open(imgFileFullPath)
         imageW, imageH = image.size
@@ -46,6 +67,14 @@ def getImagePHash(imgFileFullPath):
 
 
 def getMediaHashObject(apkDir):
+    """Traverse a directory tree and get the hash values of all resource files.
+       Args:
+         apkDir: Directory in which contents of an APK are extracted to
+       Returns:
+         An object with properties:
+           pHash: A list of pHash values
+           sha256: A list of SHA25 values
+    """
     allImageFiles = getAllFilesOfExtension(apkDir, "\.(png|jpg|jpeg|bmp)$")
     allMediaFiles = getAllFilesOfExtension(apkDir, "\.(ogg|wav|mp3|mp4|png|jpg|jpeg|bmp|html|htm|js|css)$")
     transformedMedia = {"phash": {}, "sha256": {}}
@@ -70,11 +99,19 @@ def getMediaHashObject(apkDir):
 
 
 def HashMediaFiles(apkDir, outputFile):
+    """Save the hash values of resource files to a file.
+       Args:
+         apkDir: Directory in which contents of an APK are extracted to
+         outputFile: The full filename of the target file
+       Returns:
+         None
+    """
     medaiFilesHashObject = getMediaHashObject(apkDir)
     json.dump(medaiFilesHashObject, outputFile, sort_keys=True, indent=2)
 
 
 if __name__ == '__main__':
+    # The usage of arguemnts is self-explanatory as follows
     argParser = argparse.ArgumentParser()
     argParser.add_argument("--apkDir", help="Root Directory of an APK extracted using APKTOOL", required=True)
     argParser.add_argument("--outputFile", help="The output file to be saved", type=argparse.FileType("w"), required=True)

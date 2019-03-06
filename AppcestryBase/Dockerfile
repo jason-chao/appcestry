@@ -1,5 +1,11 @@
 FROM ubuntu:18.04
 
+# This is the Dockerfile for the base container for Appcestry.
+# The following tasks are performed:
+#  - installation of all dependencies
+#  - setting OS-level environment variables
+#  - creation of directories needed
+
 ENV APPCESTRY_CORE_DIR /appcestry
 RUN mkdir ${APPCESTRY_CORE_DIR}
 RUN mkdir /tmp/appcestry
